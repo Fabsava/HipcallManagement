@@ -3,22 +3,69 @@
     ViewData["Title"] = "Yeni Şirket";
 }
 
-<div class="container mt-4">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-5 bg-white rounded">
-                    <h3 class="card-title text-dark fw-bold mb-4">Yeni Şirket Ekle</h3>
-                    
-                    <form asp-action="New" method="post">
-                        <div class="mb-4">
-                            <label asp-for="Name" class="form-label fw-medium text-dark">Şirket Adı</label>
-                            <input asp-for="Name" class="form-control form-control-lg border-secondary-subtle" placeholder="Şirket adını giriniz" required />
-                            <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="card-title mb-0 fw-bold">Yeni Şirket Ekle</h5>
+                </div>
+                <div class="card-body p-4 bg-white">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    <form action="/companies/new" method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label asp-for="Name" class="form-label fw-semibold">Şirket Adı <span class="text-danger">*</span></label>
+                                <input asp-for="Name" class="form-control" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="AssignToUserId" class="form-label fw-semibold">Atanacak Kullanıcı ID</label>
+                                <input asp-for="AssignToUserId" class="form-control" type="number" />
+                            </div>
                         </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
-                            <a asp-action="Index" class="btn btn-outline-secondary px-4 me-md-2">İptal</a>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label asp-for="WebsiteUrl" class="form-label fw-semibold">Web Sitesi</label>
+                                <input asp-for="WebsiteUrl" class="form-control" type="url" placeholder="https://" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="LinkedinUrl" class="form-label fw-semibold">LinkedIn URL</label>
+                                <input asp-for="LinkedinUrl" class="form-control" type="url" placeholder="https://" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="CustomUrl" class="form-label fw-semibold">Özel URL</label>
+                                <input asp-for="CustomUrl" class="form-control" type="url" placeholder="https://" />
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold border-bottom pb-2 mb-3">İletişim Bilgileri</h6>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">E-Posta Adresi</label>
+                                <input name="Emails[0].Email" class="form-control" type="email" placeholder="ornek@sirket.com" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Ülke Kodu (Örn: TR, US)</label>
+                                <input name="Phones[0].Country" class="form-control" placeholder="TR" />
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Telefon Numarası</label>
+                                <input name="Phones[0].Number" class="form-control" placeholder="+905303422964" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                            <a href="/companies" class="btn btn-light border px-4 me-2">İptal</a>
                             <button type="submit" class="btn btn-primary px-4">Kaydet</button>
                         </div>
                     </form>
