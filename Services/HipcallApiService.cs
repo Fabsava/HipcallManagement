@@ -128,4 +128,94 @@ public class HipcallApiService : IHipcallApiService
 
         return jsonDocument.RootElement.Deserialize<CompanyDto>(_jsonOptions)!;
     }
+
+    public async Task<IEnumerable<UserDto>> GetUsersAsync()
+    {
+        var response = await _httpClient.GetAsync("/api/v3/users");
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var jsonDocument = JsonDocument.Parse(content);
+
+        if (jsonDocument.RootElement.ValueKind == JsonValueKind.Array)
+        {
+            return jsonDocument.RootElement.Deserialize<IEnumerable<UserDto>>(_jsonOptions) ?? Enumerable.Empty<UserDto>();
+        }
+        else if (jsonDocument.RootElement.TryGetProperty("data", out var dataElement))
+        {
+            return dataElement.Deserialize<IEnumerable<UserDto>>(_jsonOptions) ?? Enumerable.Empty<UserDto>();
+        }
+
+        return Enumerable.Empty<UserDto>();
+    }
+
+    public async Task<UserDto> CreateUserAsync(CreateUserRequest request)
+    {
+        if (request.PhoneCountries != null && !request.PhoneCountries.Any())
+        {
+            request.PhoneCountries = null!;
+        }
+        if (string.IsNullOrWhiteSpace(request.Locale)) request.Locale = null;
+        if (string.IsNullOrWhiteSpace(request.Name)) request.Name = null;
+        if (string.IsNullOrWhiteSpace(request.PhonePrefix)) request.PhonePrefix = null;
+        if (string.IsNullOrWhiteSpace(request.RedirectNumber)) request.RedirectNumber = null;
+        if (string.IsNullOrWhiteSpace(request.State)) request.State = null;
+        if (string.IsNullOrWhiteSpace(request.Timezone)) request.Timezone = null;
+        if (string.IsNullOrWhiteSpace(request.Title)) request.Title = null;
+
+        var jsonContent = JsonSerializer.Serialize(request, new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+        });
+
+        var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PostAsync("/api/v3/users", httpContent);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            try
+            {
+                using var doc = JsonDocument.Parse(errorContent);
+                if (doc.RootElement.TryGetProperty("errors", out var errorsElement))
+                {
+                    var errorMessages = new List<string>();
+                    foreach (var prop in errorsElement.EnumerateObject())
+                    {
+                        var fieldName = prop.Name;
+                        if (prop.Value.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var err in prop.Value.EnumerateArray())
+                            {
+                                errorMessages.Add($"{fieldName}: {err.GetString()}");
+                            }
+                        }
+                        else
+                        {
+                            errorMessages.Add($"{fieldName}: {prop.Value.GetString()}");
+                        }
+                    }
+                    if (errorMessages.Any())
+                    {
+                        throw new HttpRequestException(string.Join(" | ", errorMessages));
+                    }
+                }
+            }
+            catch (JsonException)
+            {
+            }
+            throw new HttpRequestException($"HTTP {(int)response.StatusCode}: {errorContent}");
+        }
+
+        var content = await response.Content.ReadAsStringAsync();
+        var jsonDocument = JsonDocument.Parse(content);
+
+        if (jsonDocument.RootElement.TryGetProperty("data", out var dataElement))
+        {
+            return dataElement.Deserialize<UserDto>(_jsonOptions)!;
+        }
+
+        return jsonDocument.RootElement.Deserialize<UserDto>(_jsonOptions)!;
+    }
 }
