@@ -129,9 +129,9 @@ public class HipcallApiService : IHipcallApiService
         return jsonDocument.RootElement.Deserialize<CompanyDto>(_jsonOptions)!;
     }
 
-    public async Task<IEnumerable<UserDto>> GetUsersAsync()
+    public async Task<IEnumerable<ContactDto>> GetContactsAsync()
     {
-        var response = await _httpClient.GetAsync("/api/v3/users");
+        var response = await _httpClient.GetAsync("/api/v3/contacts");
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
@@ -139,29 +139,48 @@ public class HipcallApiService : IHipcallApiService
 
         if (jsonDocument.RootElement.ValueKind == JsonValueKind.Array)
         {
-            return jsonDocument.RootElement.Deserialize<IEnumerable<UserDto>>(_jsonOptions) ?? Enumerable.Empty<UserDto>();
+            return jsonDocument.RootElement.Deserialize<IEnumerable<ContactDto>>(_jsonOptions) ?? Enumerable.Empty<ContactDto>();
         }
         else if (jsonDocument.RootElement.TryGetProperty("data", out var dataElement))
         {
-            return dataElement.Deserialize<IEnumerable<UserDto>>(_jsonOptions) ?? Enumerable.Empty<UserDto>();
+            return dataElement.Deserialize<IEnumerable<ContactDto>>(_jsonOptions) ?? Enumerable.Empty<ContactDto>();
         }
 
-        return Enumerable.Empty<UserDto>();
+        return Enumerable.Empty<ContactDto>();
     }
 
-    public async Task<UserDto> CreateUserAsync(CreateUserRequest request)
+    public async Task<ContactDto?> GetContactByIdAsync(int id)
     {
-        if (request.PhoneCountries != null && !request.PhoneCountries.Any())
+        var response = await _httpClient.GetAsync($"/api/v3/contacts/{id}");
+        if (!response.IsSuccessStatusCode)
         {
-            request.PhoneCountries = null!;
+            return null;
         }
-        if (string.IsNullOrWhiteSpace(request.Locale)) request.Locale = null;
-        if (string.IsNullOrWhiteSpace(request.Name)) request.Name = null;
-        if (string.IsNullOrWhiteSpace(request.PhonePrefix)) request.PhonePrefix = null;
-        if (string.IsNullOrWhiteSpace(request.RedirectNumber)) request.RedirectNumber = null;
-        if (string.IsNullOrWhiteSpace(request.State)) request.State = null;
-        if (string.IsNullOrWhiteSpace(request.Timezone)) request.Timezone = null;
-        if (string.IsNullOrWhiteSpace(request.Title)) request.Title = null;
+
+        var content = await response.Content.ReadAsStringAsync();
+        var jsonDocument = JsonDocument.Parse(content);
+
+        if (jsonDocument.RootElement.TryGetProperty("data", out var dataElement))
+        {
+            return dataElement.Deserialize<ContactDto>(_jsonOptions);
+        }
+
+        return jsonDocument.RootElement.Deserialize<ContactDto>(_jsonOptions);
+    }
+
+    public async Task<ContactDto> CreateContactAsync(CreateContactRequest request)
+    {
+        if (request.Emails != null && (!request.Emails.Any() || request.Emails.All(e => string.IsNullOrWhiteSpace(e.Email))))
+        {
+            request.Emails = null!;
+        }
+        if (request.Phones != null && (!request.Phones.Any() || request.Phones.All(p => string.IsNullOrWhiteSpace(p.Number))))
+        {
+            request.Phones = null!;
+        }
+        if (string.IsNullOrWhiteSpace(request.JobTitle)) request.JobTitle = null;
+        if (string.IsNullOrWhiteSpace(request.LinkedinUrl)) request.LinkedinUrl = null;
+        if (string.IsNullOrWhiteSpace(request.CustomUrl)) request.CustomUrl = null;
 
         var jsonContent = JsonSerializer.Serialize(request, new JsonSerializerOptions
         {
@@ -170,7 +189,7 @@ public class HipcallApiService : IHipcallApiService
 
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync("/api/v3/users", httpContent);
+        var response = await _httpClient.PostAsync("/api/v3/contacts", httpContent);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -213,9 +232,9 @@ public class HipcallApiService : IHipcallApiService
 
         if (jsonDocument.RootElement.TryGetProperty("data", out var dataElement))
         {
-            return dataElement.Deserialize<UserDto>(_jsonOptions)!;
+            return dataElement.Deserialize<ContactDto>(_jsonOptions)!;
         }
 
-        return jsonDocument.RootElement.Deserialize<UserDto>(_jsonOptions)!;
+        return jsonDocument.RootElement.Deserialize<ContactDto>(_jsonOptions)!;
     }
 }

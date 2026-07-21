@@ -9,6 +9,7 @@ public interface IHipcallApiService
     Task<IEnumerable<CompanyDto>> GetCompaniesAsync();
     Task<CompanyDto?> GetCompanyByIdAsync(int id);
     Task<CompanyDto> CreateCompanyAsync(CreateCompanyRequest request);
-    Task<IEnumerable<UserDto>> GetUsersAsync();
-    Task<UserDto> CreateUserAsync(CreateUserRequest request);
+    Task<IEnumerable<ContactDto>> GetContactsAsync();
+    Task<ContactDto?> GetContactByIdAsync(int id);
+    Task<ContactDto> CreateContactAsync(CreateContactRequest request);
 }
