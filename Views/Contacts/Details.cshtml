@@ -1,7 +1,8 @@
-@model HipcallManagement.DTOs.CompanyDto
+@model HipcallManagement.DTOs.ContactDto
 @{
-    ViewData["Title"] = Model?.Name ?? "Şirket Detayı";
-    var initial = !string.IsNullOrEmpty(Model?.Name) ? Model.Name.Substring(0, 1).ToUpper() : "S";
+    ViewData["Title"] = $"{Model?.FirstName} {Model?.LastName}".Trim();
+    var initial = !string.IsNullOrEmpty(Model?.FirstName) ? Model.FirstName.Substring(0, 1).ToUpper() : "K";
+    var userName = Model?.User?.FullName ?? Model?.User?.Email;
 }
 
 <div class="row justify-content-center">
@@ -9,38 +10,56 @@
         <div class="card-custom">
             <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="avatar-initial bg-primary-subtle text-primary fs-4" style="width: 52px; height: 52px;">
+                    <div class="avatar-initial bg-success-subtle text-success fs-4" style="width: 52px; height: 52px;">
                         @initial
                     </div>
                     <div>
-                        <h4 class="fw-bold text-dark mb-1">@Model?.Name</h4>
+                        <h4 class="fw-bold text-dark mb-1">@Model?.FirstName @Model?.LastName</h4>
+                        @if (!string.IsNullOrEmpty(Model?.JobTitle))
+                        {
+                            <span class="badge bg-light text-dark border me-2">@Model.JobTitle</span>
+                        }
                         <span class="badge bg-light text-secondary border font-monospace">ID: #@Model?.Id</span>
                     </div>
                 </div>
-                <a href="/companies" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                <a href="/contacts" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
                     <i class="bi bi-arrow-left"></i> Geri Dön
                 </a>
             </div>
             
             <div class="p-4">
-                @if (!string.IsNullOrEmpty(Model?.Description))
-                {
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-card-text me-1"></i> Açıklama</h6>
-                        <div class="p-3 bg-light rounded-3 border text-dark">@Model.Description</div>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="text-muted small d-block mb-1">Atanan Kullanıcı</span>
+                            <span class="fw-semibold text-dark fs-6">
+                                @if (!string.IsNullOrEmpty(userName))
+                                {
+                                    <i class="bi bi-person-badge text-success me-1"></i>@userName <small class="text-muted font-monospace">(#@Model?.AssignToUserId)</small>
+                                }
+                                else if (Model?.AssignToUserId.HasValue == true)
+                                {
+                                    <span>Kullanıcı ID: #@Model.AssignToUserId</span>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </span>
+                        </div>
                     </div>
-                }
+                </div>
 
                 <div class="row mb-4">
                     <div class="col-md-6 mb-3">
                         <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-link-45deg me-1"></i> Bağlantılar</h6>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item px-0 bg-transparent">
-                                <span class="text-muted small d-block">Web Sitesi</span>
-                                @if (!string.IsNullOrEmpty(Model?.WebsiteUrl))
+                                <span class="text-muted small d-block">LinkedIn</span>
+                                @if (!string.IsNullOrEmpty(Model?.LinkedinUrl))
                                 {
-                                    <a href="@Model.WebsiteUrl" target="_blank" class="text-decoration-none fw-medium text-primary">
-                                        <i class="bi bi-globe me-1"></i> @Model.WebsiteUrl
+                                    <a href="@Model.LinkedinUrl" target="_blank" class="text-decoration-none fw-medium text-primary">
+                                        <i class="bi bi-linkedin me-1"></i> Profili İncele
                                     </a>
                                 }
                                 else
@@ -49,11 +68,11 @@
                                 }
                             </li>
                             <li class="list-group-item px-0 bg-transparent">
-                                <span class="text-muted small d-block">LinkedIn</span>
-                                @if (!string.IsNullOrEmpty(Model?.LinkedinUrl))
+                                <span class="text-muted small d-block">Özel URL</span>
+                                @if (!string.IsNullOrEmpty(Model?.CustomUrl))
                                 {
-                                    <a href="@Model.LinkedinUrl" target="_blank" class="text-decoration-none fw-medium text-primary">
-                                        <i class="bi bi-linkedin me-1"></i> Profili İncele
+                                    <a href="@Model.CustomUrl" target="_blank" class="text-decoration-none fw-medium text-primary">
+                                        <i class="bi bi-globe me-1"></i> @Model.CustomUrl
                                     </a>
                                 }
                                 else

@@ -15,6 +15,7 @@ public class CompaniesController : Controller
     }
 
     [HttpGet]
+    [Route("")]
     [Route("companies")]
     public async Task<IActionResult> Index()
     {
@@ -36,8 +37,9 @@ public class CompaniesController : Controller
 
     [HttpGet]
     [Route("companies/new")]
-    public IActionResult New()
+    public async Task<IActionResult> New()
     {
+        ViewBag.Users = await _apiService.GetUsersAsync();
         return View(new CreateCompanyRequest());
     }
 
@@ -47,6 +49,7 @@ public class CompaniesController : Controller
     {
         if (!ModelState.IsValid)
         {
+            ViewBag.Users = await _apiService.GetUsersAsync();
             return View(request);
         }
 
@@ -97,6 +100,7 @@ public class CompaniesController : Controller
         }
         catch (System.Exception ex)
         {
+            ViewBag.Users = await _apiService.GetUsersAsync();
             ModelState.AddModelError(string.Empty, "Kaydetme başarısız: " + ex.Message);
             return View(request);
         }

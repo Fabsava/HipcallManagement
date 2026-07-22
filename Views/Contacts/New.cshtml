@@ -29,13 +29,14 @@
                                 <label asp-for="JobTitle" class="form-label fw-semibold">Unvan (Job Title)</label>
                                 <input asp-for="JobTitle" class="form-control" placeholder="Örn: Co-founder" />
                             </div>
-                            <div class="col-md-3">
-                                <label asp-for="CompanyId" class="form-label fw-semibold">Şirket ID</label>
-                                <input asp-for="CompanyId" class="form-control" type="number" />
-                            </div>
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label asp-for="AssignToUserId" class="form-label fw-semibold">Atanacak Kullanıcı ID</label>
-                                <input asp-for="AssignToUserId" class="form-control" type="number" />
+                                <div class="input-group">
+                                    <input asp-for="AssignToUserId" id="AssignToUserId" class="form-control" type="number" placeholder="ID" />
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#userModal" title="Kullanıcı Seç">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -80,3 +81,67 @@
         </div>
     </div>
 </div>
+
+<!-- Kullanıcı Seçim Modalı -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="userModalLabel">
+                    <i class="bi bi-person-badge text-success me-2"></i> Atanacak Kullanıcı Seç (Tıklayın veya Çift Tıklayın)
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body p-0">
+                @{
+                    var users = ViewBag.Users as IEnumerable<HipcallManagement.DTOs.UserDto>;
+                }
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">ID</th>
+                                <th>Ad Soyad</th>
+                                <th>E-Posta</th>
+                                <th class="text-end">Eylem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (users != null && users.Any())
+                            {
+                                foreach (var u in users)
+                                {
+                                    var uName = !string.IsNullOrEmpty(u.Name) ? u.Name : $"{u.FirstName} {u.LastName}".Trim();
+                                    <tr style="cursor: pointer;" onclick="selectUser(@u.Id)" ondblclick="selectUser(@u.Id)">
+                                        <td><span class="badge bg-light text-dark border font-monospace">#@u.Id</span></td>
+                                        <td class="fw-semibold text-success">@(string.IsNullOrEmpty(uName) ? "-" : uName)</td>
+                                        <td class="small text-muted">@u.Email</td>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-success px-3" onclick="selectUser(@u.Id)">Seç</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">Kullanıcı bulunamadı.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectUser(id) {
+        document.getElementById('AssignToUserId').value = id;
+        var closeBtn = document.querySelector('#userModal .btn-close');
+        if (closeBtn) {
+            closeBtn.click();
+        }
+    }
+</script>

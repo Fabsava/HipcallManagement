@@ -6,11 +6,10 @@ builder.Services.Configure<HipcallManagement.Models.HipcallSettings>(builder.Con
 builder.Services.AddHttpClient<HipcallManagement.Services.IHipcallApiService, HipcallManagement.Services.HipcallApiService>((serviceProvider, client) =>
 {
     var settings = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HipcallManagement.Models.HipcallSettings>>().Value;
-    if (!string.IsNullOrEmpty(settings.BaseUrl))
-    {
-        client.BaseAddress = new Uri(settings.BaseUrl);
-    }
-    if (!string.IsNullOrEmpty(settings.ApiToken))
+    var baseUrl = !string.IsNullOrWhiteSpace(settings.BaseUrl) ? settings.BaseUrl : "https://use.hipcall.com.tr";
+    client.BaseAddress = new Uri(baseUrl);
+
+    if (!string.IsNullOrWhiteSpace(settings.ApiToken))
     {
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", settings.ApiToken);
     }
@@ -36,7 +35,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Companies}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 

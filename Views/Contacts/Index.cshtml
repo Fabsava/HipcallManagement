@@ -1,24 +1,36 @@
 @model IEnumerable<HipcallManagement.DTOs.ContactDto>
 @{
     ViewData["Title"] = "Kişiler";
+    var totalCount = Model?.Count() ?? 0;
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold m-0">Kişiler</h2>
-        <a href="/contacts/new" class="btn btn-primary px-4">Yeni Kişi Ekle</a>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1 d-flex align-items-center gap-2">
+            Kişiler
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill fs-6 px-3 py-1">@totalCount</span>
+        </h2>
+        <p class="text-muted small mb-0">Hipcall rehberinizde kayıtlı kişilerin listesi</p>
     </div>
+    <div>
+        <a href="/contacts/new" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2 fw-medium shadow-sm">
+            <i class="bi bi-person-plus fs-6"></i> Yeni Kişi Ekle
+        </a>
+    </div>
+</div>
 
+<div class="card-custom">
     <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle border">
-            <thead class="table-dark">
+        <table class="table table-custom align-middle">
+            <thead>
                 <tr>
-                    <th>ID</th>
+                    <th style="width: 80px;">ID</th>
                     <th>Ad Soyad</th>
                     <th>Unvan</th>
+                    <th>Atanan Kullanıcı</th>
                     <th>E-Posta</th>
                     <th>Telefon</th>
-                    <th>Şirket ID</th>
+                    <th class="text-end" style="width: 100px;">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,40 +39,85 @@
                     foreach (var contact in Model)
                     {
                         var fullName = $"{contact.FirstName} {contact.LastName}".Trim();
-                        var email = contact.Emails?.FirstOrDefault()?.Email;
-                        var phone = contact.Phones?.FirstOrDefault()?.Number;
+                        var initial = !string.IsNullOrEmpty(contact.FirstName) ? contact.FirstName.Substring(0, 1).ToUpper() : "K";
+                        var primaryEmail = contact.Emails?.FirstOrDefault()?.Email;
+                        var primaryPhone = contact.Phones?.FirstOrDefault()?.Number;
+                        var userName = contact.User?.FullName ?? contact.User?.Email;
                         <tr>
-                            <td>@contact.Id</td>
-                            <td class="fw-semibold">@(string.IsNullOrEmpty(fullName) ? "-" : fullName)</td>
-                            <td>@(string.IsNullOrEmpty(contact.JobTitle) ? "-" : contact.JobTitle)</td>
                             <td>
-                                @if (!string.IsNullOrEmpty(email))
+                                <span class="badge bg-light text-secondary border font-monospace">#@contact.Id</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-initial bg-success-subtle text-success">
+                                        @initial
+                                    </div>
+                                    <div class="fw-semibold text-dark">@(string.IsNullOrEmpty(fullName) ? "-" : fullName)</div>
+                                </div>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(contact.JobTitle))
                                 {
-                                    <a href="mailto:@email" class="text-decoration-none">@email</a>
+                                    <span class="badge bg-light text-dark border fw-normal">@contact.JobTitle</span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">-</span>
+                                    <span class="text-muted small">-</span>
                                 }
                             </td>
                             <td>
-                                @if (!string.IsNullOrEmpty(phone))
+                                @if (!string.IsNullOrEmpty(userName))
                                 {
-                                    <a href="tel:@phone" class="text-decoration-none">@phone</a>
+                                    <span class="fw-medium text-dark"><i class="bi bi-person-badge text-success me-1"></i>@userName</span>
+                                }
+                                else if (contact.AssignToUserId.HasValue)
+                                {
+                                    <span class="badge bg-light text-dark border font-monospace">#@contact.AssignToUserId</span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">-</span>
+                                    <span class="text-muted small">-</span>
                                 }
                             </td>
-                            <td>@(contact.CompanyId.HasValue ? contact.CompanyId.Value.ToString() : "-")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(primaryEmail))
+                                {
+                                    <a href="mailto:@primaryEmail" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                        <i class="bi bi-envelope text-primary"></i> @primaryEmail
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(primaryPhone))
+                                {
+                                    <a href="tel:@primaryPhone" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                        <i class="bi bi-telephone text-success"></i> @primaryPhone
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">-</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a href="/contacts/@contact.Id" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+                                    <i class="bi bi-eye"></i> Detay
+                                </a>
+                            </td>
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">Kayıtlı kişi bulunamadı.</td>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+                            Kayıtlı kişi bulunamadı.
+                        </td>
                     </tr>
                 }
             </tbody>

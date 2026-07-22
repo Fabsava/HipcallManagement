@@ -12,4 +12,5 @@ public interface IHipcallApiService
     Task<IEnumerable<ContactDto>> GetContactsAsync();
     Task<ContactDto?> GetContactByIdAsync(int id);
     Task<ContactDto> CreateContactAsync(CreateContactRequest request);
+    Task<IEnumerable<UserDto>> GetUsersAsync();
 }

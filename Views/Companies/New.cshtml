@@ -13,15 +13,9 @@
                 <div class="card-body p-4 bg-white">
                     <div asp-validation-summary="All" class="text-danger mb-3"></div>
                     <form action="/companies/new" method="post">
-                        <div class="row mb-3">
-                            <div class="col-md-8">
-                                <label asp-for="Name" class="form-label fw-semibold">Şirket Adı <span class="text-danger">*</span></label>
-                                <input asp-for="Name" class="form-control" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label asp-for="AssignToUserId" class="form-label fw-semibold">Atanacak Kullanıcı ID</label>
-                                <input asp-for="AssignToUserId" class="form-control" type="number" />
-                            </div>
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold">Şirket Adı <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control" required />
                         </div>
 
                         <div class="mb-3">
@@ -60,7 +54,7 @@
                             </div>
                             <div class="col-md-8">
                                 <label class="form-label fw-semibold">Telefon Numarası</label>
-                                <input name="Phones[0].Number" class="form-control" placeholder="+905303422964" />
+                                <input name="Phones[0].Number" class="form-control" placeholder="05303422964" />
                             </div>
                         </div>
 

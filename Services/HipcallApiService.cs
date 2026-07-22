@@ -237,4 +237,34 @@ public class HipcallApiService : IHipcallApiService
 
         return jsonDocument.RootElement.Deserialize<ContactDto>(_jsonOptions)!;
     }
+
+    public async Task<IEnumerable<UserDto>> GetUsersAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync("/api/v3/users");
+            if (!response.IsSuccessStatusCode)
+            {
+                return Enumerable.Empty<UserDto>();
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var jsonDocument = JsonDocument.Parse(content);
+
+            if (jsonDocument.RootElement.ValueKind == JsonValueKind.Array)
+            {
+                return jsonDocument.RootElement.Deserialize<IEnumerable<UserDto>>(_jsonOptions) ?? Enumerable.Empty<UserDto>();
+            }
+            else if (jsonDocument.RootElement.TryGetProperty("data", out var dataElement))
+            {
+                return dataElement.Deserialize<IEnumerable<UserDto>>(_jsonOptions) ?? Enumerable.Empty<UserDto>();
+            }
+
+            return Enumerable.Empty<UserDto>();
+        }
+        catch
+        {
+            return Enumerable.Empty<UserDto>();
+        }
+    }
 }

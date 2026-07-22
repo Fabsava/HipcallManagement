@@ -5,6 +5,8 @@ namespace HipcallManagement.DTOs;
 
 public class CompanyDto
 {
+    private int? _assignToUserId;
+
     [JsonPropertyName("id")]
     public int Id { get; set; }
 
@@ -12,7 +14,14 @@ public class CompanyDto
     public string Name { get; set; } = string.Empty;
 
     [JsonPropertyName("assign_to_user_id")]
-    public int? AssignToUserId { get; set; }
+    public int? AssignToUserId
+    {
+        get => _assignToUserId ?? User?.Id;
+        set => _assignToUserId = value;
+    }
+
+    [JsonPropertyName("user")]
+    public ContactUserDto? User { get; set; }
 
     [JsonPropertyName("custom_url")]
     public string? CustomUrl { get; set; }

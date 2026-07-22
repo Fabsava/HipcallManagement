@@ -24,9 +24,22 @@ public class ContactsController : Controller
     }
 
     [HttpGet]
-    [Route("contacts/new")]
-    public IActionResult New()
+    [Route("contacts/{id:int}")]
+    public async Task<IActionResult> Details(int id)
     {
+        var contact = await _apiService.GetContactByIdAsync(id);
+        if (contact == null)
+        {
+            return NotFound();
+        }
+        return View(contact);
+    }
+
+    [HttpGet]
+    [Route("contacts/new")]
+    public async Task<IActionResult> New()
+    {
+        ViewBag.Users = await _apiService.GetUsersAsync();
         return View(new CreateContactRequest());
     }
 
@@ -36,6 +49,7 @@ public class ContactsController : Controller
     {
         if (!ModelState.IsValid)
         {
+            ViewBag.Users = await _apiService.GetUsersAsync();
             return View(request);
         }
 
@@ -86,6 +100,7 @@ public class ContactsController : Controller
         }
         catch (System.Exception ex)
         {
+            ViewBag.Users = await _apiService.GetUsersAsync();
             ModelState.AddModelError(string.Empty, "Kaydetme başarısız: " + ex.Message);
             return View(request);
         }
